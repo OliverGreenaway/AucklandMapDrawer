@@ -106,7 +106,7 @@ public class Node implements Comparable<Node> {
 	 * @return A string representation of the intersection
 	 */
 	public String getDetails(){
-		String toReturn = "";
+		String toReturn = getID()+"\n";
 		for(Segment s : connections){
 			toReturn += s.getName()+"\n";
 		}
