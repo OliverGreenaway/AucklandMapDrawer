@@ -87,6 +87,7 @@ public class Road implements Comparable<Road> {
 	 *            The segment to be added
 	 */
 	public void addSegment(Segment s) {
+		s.addRoadName(this.getName());
 		segments.add(s);
 	}
 

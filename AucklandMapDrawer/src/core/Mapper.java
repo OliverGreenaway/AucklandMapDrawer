@@ -156,9 +156,13 @@ public class Mapper extends JFrame {
 	public void panelMouseReleased(MouseEvent e) {
 	}
 
+	/**
+	 * Called when the mouse is clicked on the graphics pane
+	 * @param e
+	 */
 	public void panelMouseClicked(MouseEvent e) {
 		if (map != null) {
-			map.clickedRoad(e.getX(), e.getY());
+			map.clickedNode(e.getX(), e.getY());
 		}
 		repaint();
 	}

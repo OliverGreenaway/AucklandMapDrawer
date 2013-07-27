@@ -18,6 +18,7 @@ public class Segment {
 
 	// Segment properties
 	private double length;
+	private String roadName = "";
 
 	// The end nodes of the segment
 	private int node1ID, node2ID;
@@ -53,6 +54,22 @@ public class Segment {
 	 */
 	public void addPoint(double x, double y) {
 		points.add(new DoublePoint(x, y));
+	}
+	
+	/**
+	 * Sets the name of the road the segment belongs to
+	 * @param name The name to be set
+	 */
+	public void addRoadName(String name){
+		roadName = name;
+	}
+	
+	/**
+	 * Returns the RoadName the segment belongs to
+	 * @return The name of the road
+	 */
+	public String getName(){
+		return roadName;
 	}
 
 	/**

@@ -2,12 +2,11 @@ package core;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
-
-import javax.swing.JTextArea;
 
 import util.NodeArray;
 import util.RoadArray;
@@ -31,6 +30,7 @@ public class Map {
 	private List<Polygon> polygons = new ArrayList<Polygon>();
 	private boolean polygonsExist;
 	private Road selectedRoad;
+	private Node selectedNode;
 	private TrieTree roadNames = new TrieTree();
 
 	/**
@@ -226,11 +226,16 @@ public class Map {
 		for (Node n : nodes) {
 			n.draw(g, offsetX, offsetY, zoomLevel);
 		}
+		Mapper.textArea.setText("");
 		if (selectedRoad != null) {
 			Mapper.textArea.setText("Road Details:\n"
 					+ selectedRoad.getDetails());
-		} else {
-			Mapper.textArea.setText("");
+		}
+		if(selectedNode != null){
+			if(selectedRoad != null){
+				Mapper.textArea.append("\n\n");
+			}
+			Mapper.textArea.append("Intersection Details:\n"+selectedNode.getDetails());
 		}
 	}
 
@@ -261,30 +266,31 @@ public class Map {
 	}
 
 	/**
-	 * Checks all roads to see if the click occured within the bondries of the
-	 * road, if a road has been clicked then the road is marked as selected
+	 * Checks all nodes to see which is closest to the click and select the node
 	 *
 	 * @param x
 	 *            The mouseX coordinate
 	 * @param y
 	 *            The mouseY coordinate
 	 */
-	public void clickedRoad(int x, int y) {
-		for (Road r : roads) {
-			Road road = r.on(x, y, offsetX, offsetY, zoomLevel);
-			if (road != null) {
-				if (selectedRoad != null) {
-					selectedRoad.setSelect(false);
-				}
-				selectedRoad = road;
-				road.setSelect(true);
-				return;
+	public void clickedNode(int x, int y) {
+		if (selectedNode != null) {
+			selectedNode.setSelect(false);
+		}
+		Node closest = null;
+		double closestDistance = Double.MAX_VALUE;
+		int count = 0;
+		for (Node n : nodes) {
+			double dist = n.getDist(x,y,offsetX,offsetY,zoomLevel);
+			if(dist < closestDistance){
+				closestDistance = dist;
+				closest = n;
 			}
 		}
-		if (selectedRoad != null) {
-			selectedRoad.setSelect(false);
+		selectedNode = closest;
+		if(selectedNode != null){
+			selectedNode.setSelect(true);
 		}
-		selectedRoad = null;
 	}
 
 	/**
