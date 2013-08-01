@@ -58,6 +58,14 @@ public class Node implements Comparable<Node> {
 	public Point getPoint() {
 		return new Point((int) this.x, (int) this.y);
 	}
+	
+	/**
+	 * Returns a list of connecting segments
+	 * @return Segments connected to the node
+	 */
+	public List<Segment> getNeighbours(){
+		return connections;
+	}
 
 	/**
 	 * Draws a Node as a blue 1px X 1px dot

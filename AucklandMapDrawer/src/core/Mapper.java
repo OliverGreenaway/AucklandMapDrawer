@@ -21,6 +21,7 @@ import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JTextArea;
+import javax.swing.SwingUtilities;
 
 /**
  * The main class for the Mapping program, handles the GUI and interaction with
@@ -162,7 +163,11 @@ public class Mapper extends JFrame {
 	 */
 	public void panelMouseClicked(MouseEvent e) {
 		if (map != null) {
-			map.clickedNode(e.getX(), e.getY());
+			if(SwingUtilities.isLeftMouseButton(e)){
+				map.clickedSourceNode(e.getX(), e.getY());
+			}else if(SwingUtilities.isRightMouseButton(e)){
+				map.clickedDestNode(e.getX(), e.getY());
+			}
 		}
 		repaint();
 	}

@@ -193,5 +193,9 @@ public class Road implements Comparable<Road> {
 		}
 		return details;
 	}
+	
+	public boolean isOneWay(){
+		return oneway;
+	}
 
 }

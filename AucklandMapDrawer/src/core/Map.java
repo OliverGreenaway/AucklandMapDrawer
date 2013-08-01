@@ -15,9 +15,9 @@ import util.TrieTree;
 /**
  * A Map contains information on all objects that are used to construct and draw
  * a map
- *
+ * 
  * @author Oliver Greenaway
- *
+ * 
  */
 public class Map {
 
@@ -28,15 +28,17 @@ public class Map {
 	private NodeArray nodes = new NodeArray();
 	private RoadArray roads = new RoadArray();
 	private List<Polygon> polygons = new ArrayList<Polygon>();
+	private List<Segment> markedPath = new ArrayList<Segment>();
 	private boolean polygonsExist;
 	private Road selectedRoad;
-	private Node selectedNode;
+	private Node selectedSourceNode;
+	private Node selectedDestNode;
 	private TrieTree roadNames = new TrieTree();
 
 	/**
 	 * Initializes all Nodes, Roads and Segments into a graphed map using the
 	 * information contained in the directory
-	 *
+	 * 
 	 * @param dir
 	 *            The directory containing the data files
 	 */
@@ -148,7 +150,7 @@ public class Map {
 					if (road != null) {
 						Segment s = new Segment(Double.parseDouble(columns[1]),
 								Integer.parseInt(columns[2]),
-								Integer.parseInt(columns[3]));
+								Integer.parseInt(columns[3]), road.isOneWay());
 						for (int i = 4; i < columns.length; i += 2) {
 							double x = lonToX(Double
 									.parseDouble(columns[i + 1]));
@@ -205,7 +207,7 @@ public class Map {
 
 	/**
 	 * Draws all the map components to the graphics object
-	 *
+	 * 
 	 * @param g
 	 *            The graphics object to be drawn to
 	 */
@@ -231,17 +233,18 @@ public class Map {
 			Mapper.textArea.setText("Road Details:\n"
 					+ selectedRoad.getDetails());
 		}
-		if(selectedNode != null){
-			if(selectedRoad != null){
+		if (selectedSourceNode != null) {
+			if (selectedRoad != null) {
 				Mapper.textArea.append("\n\n");
 			}
-			Mapper.textArea.append("Intersection Details:\n"+selectedNode.getDetails());
+			Mapper.textArea.append("Intersection Details:\n"
+					+ selectedSourceNode.getDetails());
 		}
 	}
 
 	/**
 	 * Adjust the offset of the map by the given x and y positions
-	 *
+	 * 
 	 * @param x
 	 *            The distance to move in the x direction
 	 * @param y
@@ -254,7 +257,7 @@ public class Map {
 
 	/**
 	 * Adjust the zoom level by 0.5 per notch rotated
-	 *
+	 * 
 	 * @param notches
 	 *            The number of mouse wheel notches moved
 	 */
@@ -267,35 +270,115 @@ public class Map {
 
 	/**
 	 * Checks all nodes to see which is closest to the click and select the node
-	 *
+	 * 
 	 * @param x
 	 *            The mouseX coordinate
 	 * @param y
 	 *            The mouseY coordinate
 	 */
-	public void clickedNode(int x, int y) {
-		if (selectedNode != null) {
-			selectedNode.setSelect(false);
+	public void clickedSourceNode(int x, int y) {
+		if (selectedSourceNode != null) {
+			selectedSourceNode.setSelect(false);
 		}
 		Node closest = null;
 		double closestDistance = Double.MAX_VALUE;
 		int count = 0;
 		for (Node n : nodes) {
-			double dist = n.getDist(x,y,offsetX,offsetY,zoomLevel);
-			if(dist < closestDistance){
+			double dist = n.getDist(x, y, offsetX, offsetY, zoomLevel);
+			if (dist < closestDistance) {
 				closestDistance = dist;
 				closest = n;
 			}
 		}
-		selectedNode = closest;
-		if(selectedNode != null){
-			selectedNode.setSelect(true);
+		selectedSourceNode = closest;
+		if (selectedSourceNode != null) {
+			selectedSourceNode.setSelect(true);
+		}
+		updatePath();
+	}
+
+	/**
+	 * Checks all nodes to see which is closest to the click and select the node
+	 * 
+	 * @param x
+	 *            The mouseX coordinate
+	 * @param y
+	 *            The mouseY coordinate
+	 */
+	public void clickedDestNode(int x, int y) {
+		if (selectedDestNode != null) {
+			selectedDestNode.setSelect(false);
+		}
+		Node closest = null;
+		double closestDistance = Double.MAX_VALUE;
+		int count = 0;
+		for (Node n : nodes) {
+			double dist = n.getDist(x, y, offsetX, offsetY, zoomLevel);
+			if (dist < closestDistance) {
+				closestDistance = dist;
+				closest = n;
+			}
+		}
+		selectedDestNode = closest;
+		if (selectedDestNode != null) {
+			selectedDestNode.setSelect(true);
+		}
+		updatePath();
+	}
+
+	/**
+	 * Using A* algorithm, the fastest path is found between two intersections
+	 * if two intersections are selected
+	 */
+	private void updatePath() {
+		if (selectedDestNode != null && selectedSourceNode != null) {
+			for (Segment s : markedPath) {
+				s.setSelect(false);
+			}
+			markedPath = new ArrayList<Segment>();
+			List<Node> visited = new ArrayList<Node>();
+			List<Object[]> fringe = new ArrayList<Object[]>(); // [Node,prevNode,pathLength,adjustedLength]
+			fringe.add(new Object[]{selectedSourceNode,null,0,(int)(selectedSourceNode.getPoint().distance(selectedDestNode.getPoint())),null});
+			while(fringe.size() > 0){
+				int indexToRemove = 0;
+				int minLength = Integer.MAX_VALUE;
+				for(int i=0; i<fringe.size(); i++){
+					if((Integer)(fringe.get(i)[3]) < minLength){
+						minLength = (Integer)(fringe.get(i)[3]);
+						indexToRemove = i;
+					}
+				}
+				Object[] working = fringe.remove(indexToRemove);
+				if(!visited.contains(working[0])){
+					visited.add((Node)working[0]);
+					if(working[0] == selectedDestNode){
+						//TODO create quickest path
+						Object[] temp = working;
+						while(temp[4] != null){
+							((Segment)temp[4]).setSelect(true);
+							markedPath.add((Segment)temp[4]);
+							temp = (Object[])temp[1];
+						}
+						return;
+					}else{
+						List<Segment> neighbours = ((Node)working[0]).getNeighbours();
+						for(Segment n : neighbours){
+							Node otherNode = n.getOppositeNode((Node)working[0], true);
+							if(!(otherNode == null || visited.contains(otherNode))){
+								fringe.add(new Object[]{otherNode,working,(Integer)working[2]+n.getLength(),(int)(otherNode.getPoint().distance(selectedDestNode.getPoint())),n});
+							}
+						}
+					}
+				}
+			}
+		} else {
+			return;
 		}
 	}
 
 	/**
 	 * Returns the 10 closest road names to the given string
-	 *
+	 * 
 	 * @param text
 	 *            the string to be searched for
 	 * @return A list of at most 10 roads
@@ -306,7 +389,7 @@ public class Map {
 
 	/**
 	 * Deselects any currently selected roads and selects the given road
-	 *
+	 * 
 	 * @param r
 	 *            the road to be selected
 	 */
@@ -322,7 +405,7 @@ public class Map {
 
 	/**
 	 * converts latitude into Y coordinates
-	 *
+	 * 
 	 * @param latitude
 	 *            The degree of latitude
 	 * @return The Y coordinate
@@ -333,7 +416,7 @@ public class Map {
 
 	/**
 	 * converts longitude into X coordinates
-	 *
+	 * 
 	 * @param longitude
 	 *            The degree of longitude
 	 * @return The X coordinate
@@ -344,7 +427,7 @@ public class Map {
 
 	/**
 	 * converts a string to an int
-	 *
+	 * 
 	 * @param s
 	 *            The string to be converted
 	 * @return The int representation of the string, 0 is a conversion error is

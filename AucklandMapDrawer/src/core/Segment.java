@@ -1,5 +1,6 @@
 package core;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Path2D;
 import java.util.ArrayList;
@@ -10,15 +11,17 @@ import util.NodeArray;
 
 /**
  * A single section of road between two intersectons
- *
+ * 
  * @author Oliver Greenaway
- *
+ * 
  */
 public class Segment {
 
 	// Segment properties
 	private double length;
 	private String roadName = "";
+	private boolean selected = false;
+	private boolean oneway = false;
 
 	// The end nodes of the segment
 	private int node1ID, node2ID;
@@ -30,7 +33,7 @@ public class Segment {
 	/**
 	 * Constructs a new segment with the given length and the ID's of the end
 	 * nodes
-	 *
+	 * 
 	 * @param length
 	 *            The length of the segment of road
 	 * @param nodeID1
@@ -38,15 +41,16 @@ public class Segment {
 	 * @param nodeID2
 	 *            The ID of a end node
 	 */
-	public Segment(double length, int nodeID1, int nodeID2) {
+	public Segment(double length, int nodeID1, int nodeID2, boolean oneway) {
 		this.length = length;
 		this.node1ID = nodeID1;
 		this.node2ID = nodeID2;
+		this.oneway = oneway;
 	}
 
 	/**
 	 * Adds a coordinate to the list of coordinates
-	 *
+	 * 
 	 * @param x
 	 *            The x position of the point
 	 * @param y
@@ -55,26 +59,29 @@ public class Segment {
 	public void addPoint(double x, double y) {
 		points.add(new DoublePoint(x, y));
 	}
-	
+
 	/**
 	 * Sets the name of the road the segment belongs to
-	 * @param name The name to be set
+	 * 
+	 * @param name
+	 *            The name to be set
 	 */
-	public void addRoadName(String name){
+	public void addRoadName(String name) {
 		roadName = name;
 	}
-	
+
 	/**
 	 * Returns the RoadName the segment belongs to
+	 * 
 	 * @return The name of the road
 	 */
-	public String getName(){
+	public String getName() {
 		return roadName;
 	}
 
 	/**
 	 * Draws the segment by linking points with lines
-	 *
+	 * 
 	 * @param g
 	 *            The Graphics object to be drawn to
 	 * @param offsetX
@@ -85,6 +92,10 @@ public class Segment {
 	 *            The current zoom factor of the map
 	 */
 	public void draw(Graphics2D g, double offsetX, double offsetY, double zoom) {
+		Color temp = g.getColor();
+		if (selected) {
+			g.setColor(Color.red);
+		}
 		DoublePoint prevPoint = points.get(0);
 		for (int i = 1; i < points.size(); i++) {
 			g.drawLine((int) ((points.get(i).getX() + offsetX) * zoom),
@@ -93,12 +104,23 @@ public class Segment {
 					(int) ((prevPoint.getY() + offsetY) * zoom));
 			prevPoint = points.get(i);
 		}
+		g.setColor(temp);
+	}
+
+	/**
+	 * Sets whether or not the current segment is a part of the shortest path
+	 * 
+	 * @param s
+	 *            True for selected, false for not
+	 */
+	public void setSelect(boolean s) {
+		selected = s;
 	}
 
 	/**
 	 * Searches the Collection of nodes for the stored node ID's and connects
 	 * the segment with the Node both at node level and in the segment
-	 *
+	 * 
 	 * @param nodes
 	 *            The Collection of nodes
 	 */
@@ -119,7 +141,7 @@ public class Segment {
 
 	/**
 	 * Checks if the segment has been clicked on
-	 *
+	 * 
 	 * @param x
 	 *            MouseX coordinate
 	 * @param y
@@ -143,5 +165,35 @@ public class Segment {
 					* zoom);
 		}
 		return path.getBounds().contains(x, y);
+	}
+
+	/**
+	 * Returns the node that is at the other end of the segment to the given
+	 * node. If oneway matters then the node is only returned if it is
+	 * accessable.
+	 * 
+	 * @param from
+	 * @return
+	 */
+	public Node getOppositeNode(Node from, boolean directional) {
+		if (from == node1) {
+			return node2;
+		} else if (from == node2) {
+			if (oneway && directional) {
+				return null;
+			} else {
+				return node1;
+			}
+		} else {
+			return null;
+		}
+	}
+	
+	/**
+	 * Returns an estimate of the length of the road.
+	 * @return
+	 */
+	public int getLength(){
+		return (int)length;
 	}
 }
