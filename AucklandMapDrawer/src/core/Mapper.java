@@ -3,6 +3,7 @@ package core;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Container;
+import java.awt.Dimension;
 import java.awt.Graphics;
 import java.awt.Graphics2D;
 import java.awt.event.ActionEvent;
@@ -20,6 +21,8 @@ import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JPanel;
+import javax.swing.JScrollBar;
+import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
 import javax.swing.SwingUtilities;
 
@@ -40,6 +43,7 @@ public class Mapper extends JFrame {
 	private JPanel textOutputPane = new JPanel();
 	private JButton loadDataButton = new JButton("Load Data");
 	public static JTextArea textArea = new JTextArea();
+	private JScrollPane scrollingTextBox = new JScrollPane(textArea);
 	private JComboBox dropDown = new JComboBox();
 	List<Road> selectedRoads;
 
@@ -70,8 +74,9 @@ public class Mapper extends JFrame {
 		loadDataButton.setSize(120, 30);
 		textArea.setRows(10);
 		textArea.setColumns(getWidth() / 15);
-		textArea.setEnabled(true); // Changing to false will disable edit mode
-									// but make the text less readable
+		textArea.setEnabled(true);
+		textArea.setMaximumSize(new Dimension(1000, 500));
+		scrollingTextBox.setSize(textArea.getWidth(), textArea.getHeight());
 		dropDown.setMaximumRowCount(10);
 		dropDown.setEditable(true);
 
@@ -132,7 +137,7 @@ public class Mapper extends JFrame {
 		con.add(textOutputPane, BorderLayout.SOUTH);
 		menuPane.add(loadDataButton, BorderLayout.WEST);
 		menuPane.add(dropDown, BorderLayout.EAST);
-		textOutputPane.add(textArea);
+		textOutputPane.add(scrollingTextBox);
 		this.setVisible(true);
 	}
 

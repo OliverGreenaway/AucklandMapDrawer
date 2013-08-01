@@ -15,9 +15,9 @@ import util.TrieTree;
 /**
  * A Map contains information on all objects that are used to construct and draw
  * a map
- * 
+ *
  * @author Oliver Greenaway
- * 
+ *
  */
 public class Map {
 
@@ -38,7 +38,7 @@ public class Map {
 	/**
 	 * Initializes all Nodes, Roads and Segments into a graphed map using the
 	 * information contained in the directory
-	 * 
+	 *
 	 * @param dir
 	 *            The directory containing the data files
 	 */
@@ -207,7 +207,7 @@ public class Map {
 
 	/**
 	 * Draws all the map components to the graphics object
-	 * 
+	 *
 	 * @param g
 	 *            The graphics object to be drawn to
 	 */
@@ -231,20 +231,44 @@ public class Map {
 		Mapper.textArea.setText("");
 		if (selectedRoad != null) {
 			Mapper.textArea.setText("Road Details:\n"
-					+ selectedRoad.getDetails());
+					+ selectedRoad.getDetails()+"\n\n");
 		}
 		if (selectedSourceNode != null) {
-			if (selectedRoad != null) {
-				Mapper.textArea.append("\n\n");
-			}
-			Mapper.textArea.append("Intersection Details:\n"
-					+ selectedSourceNode.getDetails());
+			Mapper.textArea.append("Source Intersection Details:\n"
+					+ selectedSourceNode.getDetails()+"\n\n");
 		}
+		if (selectedDestNode != null) {
+			Mapper.textArea.append("Destination Intersection Details:\n"
+					+ selectedDestNode.getDetails()+"\n\n");
+		}
+		if(!markedPath.isEmpty()){
+			Mapper.textArea.append("Route Details:"+roadsAndDistance(markedPath));
+		}
+	}
+
+	private String roadsAndDistance(List<Segment> segments) {
+		String details = "";
+		String curName = "";
+		double curLength = 0;
+		for(int i=segments.size()-1; i>=0; i--){
+			Segment cur = segments.get(i);
+			double length = cur.getAccurLength();//Math.round(cur.getAccurLength()*100)/100;
+			if(cur.getName().equals(curName) || curName.equals("")){
+				curName = cur.getName();
+				curLength += length;
+			}else{
+				curLength = ((double)((int)(curLength*100)))/100;
+				details += "\n"+curName+": "+curLength+"km";
+				curName = cur.getName();
+				curLength = length;
+			}
+		}
+		return details;
 	}
 
 	/**
 	 * Adjust the offset of the map by the given x and y positions
-	 * 
+	 *
 	 * @param x
 	 *            The distance to move in the x direction
 	 * @param y
@@ -257,7 +281,7 @@ public class Map {
 
 	/**
 	 * Adjust the zoom level by 0.5 per notch rotated
-	 * 
+	 *
 	 * @param notches
 	 *            The number of mouse wheel notches moved
 	 */
@@ -270,7 +294,7 @@ public class Map {
 
 	/**
 	 * Checks all nodes to see which is closest to the click and select the node
-	 * 
+	 *
 	 * @param x
 	 *            The mouseX coordinate
 	 * @param y
@@ -299,7 +323,7 @@ public class Map {
 
 	/**
 	 * Checks all nodes to see which is closest to the click and select the node
-	 * 
+	 *
 	 * @param x
 	 *            The mouseX coordinate
 	 * @param y
@@ -378,7 +402,7 @@ public class Map {
 
 	/**
 	 * Returns the 10 closest road names to the given string
-	 * 
+	 *
 	 * @param text
 	 *            the string to be searched for
 	 * @return A list of at most 10 roads
@@ -389,7 +413,7 @@ public class Map {
 
 	/**
 	 * Deselects any currently selected roads and selects the given road
-	 * 
+	 *
 	 * @param r
 	 *            the road to be selected
 	 */
@@ -405,7 +429,7 @@ public class Map {
 
 	/**
 	 * converts latitude into Y coordinates
-	 * 
+	 *
 	 * @param latitude
 	 *            The degree of latitude
 	 * @return The Y coordinate
@@ -416,7 +440,7 @@ public class Map {
 
 	/**
 	 * converts longitude into X coordinates
-	 * 
+	 *
 	 * @param longitude
 	 *            The degree of longitude
 	 * @return The X coordinate
@@ -427,7 +451,7 @@ public class Map {
 
 	/**
 	 * converts a string to an int
-	 * 
+	 *
 	 * @param s
 	 *            The string to be converted
 	 * @return The int representation of the string, 0 is a conversion error is

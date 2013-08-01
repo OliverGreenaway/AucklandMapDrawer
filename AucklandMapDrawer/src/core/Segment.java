@@ -11,9 +11,9 @@ import util.NodeArray;
 
 /**
  * A single section of road between two intersectons
- * 
+ *
  * @author Oliver Greenaway
- * 
+ *
  */
 public class Segment {
 
@@ -33,7 +33,7 @@ public class Segment {
 	/**
 	 * Constructs a new segment with the given length and the ID's of the end
 	 * nodes
-	 * 
+	 *
 	 * @param length
 	 *            The length of the segment of road
 	 * @param nodeID1
@@ -50,7 +50,7 @@ public class Segment {
 
 	/**
 	 * Adds a coordinate to the list of coordinates
-	 * 
+	 *
 	 * @param x
 	 *            The x position of the point
 	 * @param y
@@ -62,7 +62,7 @@ public class Segment {
 
 	/**
 	 * Sets the name of the road the segment belongs to
-	 * 
+	 *
 	 * @param name
 	 *            The name to be set
 	 */
@@ -72,7 +72,7 @@ public class Segment {
 
 	/**
 	 * Returns the RoadName the segment belongs to
-	 * 
+	 *
 	 * @return The name of the road
 	 */
 	public String getName() {
@@ -81,7 +81,7 @@ public class Segment {
 
 	/**
 	 * Draws the segment by linking points with lines
-	 * 
+	 *
 	 * @param g
 	 *            The Graphics object to be drawn to
 	 * @param offsetX
@@ -109,7 +109,7 @@ public class Segment {
 
 	/**
 	 * Sets whether or not the current segment is a part of the shortest path
-	 * 
+	 *
 	 * @param s
 	 *            True for selected, false for not
 	 */
@@ -120,7 +120,7 @@ public class Segment {
 	/**
 	 * Searches the Collection of nodes for the stored node ID's and connects
 	 * the segment with the Node both at node level and in the segment
-	 * 
+	 *
 	 * @param nodes
 	 *            The Collection of nodes
 	 */
@@ -141,7 +141,7 @@ public class Segment {
 
 	/**
 	 * Checks if the segment has been clicked on
-	 * 
+	 *
 	 * @param x
 	 *            MouseX coordinate
 	 * @param y
@@ -171,7 +171,7 @@ public class Segment {
 	 * Returns the node that is at the other end of the segment to the given
 	 * node. If oneway matters then the node is only returned if it is
 	 * accessable.
-	 * 
+	 *
 	 * @param from
 	 * @return
 	 */
@@ -188,12 +188,20 @@ public class Segment {
 			return null;
 		}
 	}
-	
+
 	/**
 	 * Returns an estimate of the length of the road.
 	 * @return
 	 */
 	public int getLength(){
 		return (int)length;
+	}
+
+	/**
+	 * Returns an accurate value of the length of the road.
+	 * @return
+	 */
+	public double getAccurLength(){
+		return length;
 	}
 }
