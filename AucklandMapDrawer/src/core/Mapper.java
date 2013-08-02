@@ -40,6 +40,7 @@ public class Mapper extends JFrame {
 	// JFrame Components
 	private JPanel drawingPane = new JPanel();
 	private JPanel menuPane = new JPanel();
+	private JPanel buttonPane = new JPanel();
 	private JPanel textOutputPane = new JPanel();
 	private JButton loadDataButton = new JButton("Load Data");
 	private JButton articulationButton = new JButton("Critical Points");
@@ -66,14 +67,15 @@ public class Mapper extends JFrame {
 		super("Auckland Road System");
 		this.setSize(800, 800);
 		this.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		this.setResizable(true); // TODO set to false for marking
+		this.setResizable(true);
 
 		// Assign position and graphic variables to components
 		menuPane.setBackground(Color.lightGray);
+		buttonPane.setBackground(Color.lightGray);
 		drawingPane.setBackground(Color.white);
 		textOutputPane.setBackground(Color.lightGray);
 		loadDataButton.setSize(120, 30);
-		//TODO change button size
+		articulationButton.setSize(120, 30);
 		textArea.setRows(10);
 		textArea.setColumns(getWidth() / 15);
 		textArea.setEnabled(true);
@@ -138,8 +140,9 @@ public class Mapper extends JFrame {
 		con.add(menuPane, BorderLayout.NORTH);
 		con.add(drawingPane, BorderLayout.CENTER);
 		con.add(textOutputPane, BorderLayout.SOUTH);
-		menuPane.add(loadDataButton, BorderLayout.WEST);
-		menuPane.add(articulationButton, BorderLayout.CENTER);
+		buttonPane.add(loadDataButton);
+		buttonPane.add(articulationButton);
+		menuPane.add(buttonPane, BorderLayout.WEST);
 		menuPane.add(dropDown, BorderLayout.EAST);
 		textOutputPane.add(scrollingTextBox);
 		this.setVisible(true);
