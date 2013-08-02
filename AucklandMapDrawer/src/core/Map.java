@@ -2,11 +2,11 @@ package core;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
-import java.awt.Point;
 import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Stack;
 
 import util.NodeArray;
 import util.RoadArray;
@@ -29,6 +29,7 @@ public class Map {
 	private RoadArray roads = new RoadArray();
 	private List<Polygon> polygons = new ArrayList<Polygon>();
 	private List<Segment> markedPath = new ArrayList<Segment>();
+	private List<Node> articulations = new ArrayList<Node>();
 	private boolean polygonsExist;
 	private Road selectedRoad;
 	private Node selectedSourceNode;
@@ -228,6 +229,9 @@ public class Map {
 		for (Node n : nodes) {
 			n.draw(g, offsetX, offsetY, zoomLevel);
 		}
+		for(Node n : articulations){
+			n.drawArticulation(g, offsetX, offsetY, zoomLevel);
+		}
 		Mapper.textArea.setText("");
 		if (selectedRoad != null) {
 			Mapper.textArea.setText("Road Details:\n"
@@ -376,7 +380,6 @@ public class Map {
 				if(!visited.contains(working[0])){
 					visited.add((Node)working[0]);
 					if(working[0] == selectedDestNode){
-						//TODO create quickest path
 						Object[] temp = working;
 						while(temp[4] != null){
 							((Segment)temp[4]).setSelect(true);
@@ -398,6 +401,69 @@ public class Map {
 		} else {
 			return;
 		}
+	}
+
+
+	public void findArticulations(){
+		if(selectedSourceNode != null){
+			this.articulations = getArticulations(selectedSourceNode, 0, selectedSourceNode);
+		}else if(selectedDestNode != null){
+			this.articulations = getArticulations(selectedDestNode, 0, selectedDestNode);
+		}else{
+			Mapper.textArea.setText("Must select a Intersection before finding choke points");
+		}
+	}
+
+	/**
+	 * Works through the graph of nodes finding all articulation points
+	 * @param startNode The node to start from
+	 * @param depth The starting depth
+	 * @param root The root node
+	 * @return An arrayList of Nodes that are articulation points
+	 */
+	private List<Node> getArticulations(Node startNode, int depth, Node root){
+		for(Node n : nodes){
+			n.setDepth(Integer.MAX_VALUE);
+		}
+		List<Node> articulations = new ArrayList<Node>();
+		Stack<Object[]> stack = new Stack<Object[]>();
+
+		stack.push(new Object[]{startNode, 1, 1, new Object[]{root, 0, 0, null, null}, null}); //[[startNode,nodeDepth],depth,reach,[previousElement,previousDepth],children]
+		while(!stack.isEmpty()){
+			Object[] element = stack.peek();
+			Node curNode = (Node)element[0];
+			if(element[4] == null){
+				//first time
+				curNode.setDepth((Integer)element[1]);
+				element[2] = element[1];
+				element[4] = new ArrayList<Node>();
+				for(Segment s : curNode.getNeighbours()){
+					Node neighbour = s.getOppositeNode(curNode, false);
+					if(neighbour != (Node)((Object[])element[3])[0]){
+						((List<Node>)(element[4])).add(neighbour);
+					}
+				}
+			}else if(!((List<Node>)(element[4])).isEmpty()){
+				//children to process
+				Node child = ((List<Node>)element[4]).remove(0);
+				if(child.getDepth() < Integer.MAX_VALUE){
+					element[2] = Math.min(((Integer)element[2]),child.getDepth());
+				}else{
+					stack.push(new Object[]{child,curNode.getDepth()+1,0,element,null});
+				}
+			}else{
+				//last time
+				if(curNode != startNode){
+					if((Integer)element[2] >= (Integer)((Object[])element[3])[1]){
+						articulations.add((Node)((Object[])element[3])[0]);
+					}
+					((Object[])element[3])[2] = Math.min((Integer)((Object[])element[3])[2], (Integer)element[2]);
+				}
+				stack.pop();
+			}
+		}
+
+		return articulations;
 	}
 
 	/**

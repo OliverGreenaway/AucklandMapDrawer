@@ -42,6 +42,7 @@ public class Mapper extends JFrame {
 	private JPanel menuPane = new JPanel();
 	private JPanel textOutputPane = new JPanel();
 	private JButton loadDataButton = new JButton("Load Data");
+	private JButton articulationButton = new JButton("Critical Points");
 	public static JTextArea textArea = new JTextArea();
 	private JScrollPane scrollingTextBox = new JScrollPane(textArea);
 	private JComboBox dropDown = new JComboBox();
@@ -72,6 +73,7 @@ public class Mapper extends JFrame {
 		drawingPane.setBackground(Color.white);
 		textOutputPane.setBackground(Color.lightGray);
 		loadDataButton.setSize(120, 30);
+		//TODO change button size
 		textArea.setRows(10);
 		textArea.setColumns(getWidth() / 15);
 		textArea.setEnabled(true);
@@ -110,6 +112,7 @@ public class Mapper extends JFrame {
 			}
 		};
 		loadDataButton.addActionListener(aListener);
+		articulationButton.addActionListener(aListener);
 		dropDown.addActionListener(new ActionListener() {
 
 			@Override
@@ -136,6 +139,7 @@ public class Mapper extends JFrame {
 		con.add(drawingPane, BorderLayout.CENTER);
 		con.add(textOutputPane, BorderLayout.SOUTH);
 		menuPane.add(loadDataButton, BorderLayout.WEST);
+		menuPane.add(articulationButton, BorderLayout.CENTER);
 		menuPane.add(dropDown, BorderLayout.EAST);
 		textOutputPane.add(scrollingTextBox);
 		this.setVisible(true);
@@ -219,6 +223,10 @@ public class Mapper extends JFrame {
 				map = new Map(dataDirectory);
 			} else {
 				return;
+			}
+		}else if(e.getSource() == articulationButton){
+			if(map != null){
+				map.findArticulations();
 			}
 		}
 		repaint();
