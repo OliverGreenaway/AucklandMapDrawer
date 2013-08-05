@@ -4,8 +4,10 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Scanner;
+import java.util.Set;
 import java.util.Stack;
 
 import util.NodeArray;
@@ -29,7 +31,7 @@ public class Map {
 	private RoadArray roads = new RoadArray();
 	private List<Polygon> polygons = new ArrayList<Polygon>();
 	private List<Segment> markedPath = new ArrayList<Segment>();
-	private List<Node> articulations = new ArrayList<Node>();
+	private Set<Node> articulations = new HashSet<Node>();
 	private boolean polygonsExist;
 	private Road selectedRoad;
 	private Node selectedSourceNode;
@@ -412,6 +414,7 @@ public class Map {
 		}else{
 			Mapper.textArea.setText("Must select a Intersection before finding choke points");
 		}
+		System.out.println(articulations.size());
 	}
 
 	/**
@@ -421,11 +424,11 @@ public class Map {
 	 * @param root The root node
 	 * @return An arrayList of Nodes that are articulation points
 	 */
-	private List<Node> getArticulations(Node startNode, int depth, Node root){
+	private Set<Node> getArticulations(Node startNode, int depth, Node root){
 		for(Node n : nodes){
 			n.setDepth(Integer.MAX_VALUE);
 		}
-		List<Node> articulations = new ArrayList<Node>();
+		Set<Node> articulations = new HashSet<Node>();
 		Stack<Object[]> stack = new Stack<Object[]>();
 
 		stack.push(new Object[]{startNode, 1, 1, new Object[]{root, 0, 0, null, null}, null}); //[[startNode,nodeDepth],depth,reach,[previousElement,previousDepth],children]

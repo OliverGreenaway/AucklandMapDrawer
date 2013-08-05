@@ -80,9 +80,10 @@ public class Mapper extends JFrame {
 		textArea.setColumns(getWidth() / 15);
 		textArea.setEnabled(true);
 		textArea.setMaximumSize(new Dimension(1000, 500));
+		textArea.setEditable(false);
 		scrollingTextBox.setSize(textArea.getWidth(), textArea.getHeight());
 		dropDown.setMaximumRowCount(10);
-		dropDown.setEditable(false);
+		dropDown.setEditable(true);
 
 		// Create ActionListeners for each component
 		drawingPane.addMouseListener(new MouseAdapter() {
