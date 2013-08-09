@@ -193,9 +193,30 @@ public class Road implements Comparable<Road> {
 		}
 		return details;
 	}
-	
+
 	public boolean isOneWay(){
 		return oneway;
+	}
+
+	public int getSpeed(){
+		switch(speed){
+		case 1:
+			return 20;
+		case 2:
+			return 40;
+		case 3:
+			return 60;
+		case 4:
+			return 80;
+		case 5:
+			return 100;
+		case 6:
+			return 110;
+		case 7:
+			return 120;
+		default:
+			return 0;
+		}
 	}
 
 }

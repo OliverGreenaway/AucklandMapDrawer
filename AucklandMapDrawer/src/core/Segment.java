@@ -19,6 +19,7 @@ public class Segment {
 
 	// Segment properties
 	private double length;
+	private int speed;
 	private String roadName = "";
 	private boolean selected = false;
 	private boolean oneway = false;
@@ -41,11 +42,12 @@ public class Segment {
 	 * @param nodeID2
 	 *            The ID of a end node
 	 */
-	public Segment(double length, int nodeID1, int nodeID2, boolean oneway) {
+	public Segment(double length, int nodeID1, int nodeID2, boolean oneway, int speed) {
 		this.length = length;
 		this.node1ID = nodeID1;
 		this.node2ID = nodeID2;
 		this.oneway = oneway;
+		this.speed = speed;
 	}
 
 	/**
@@ -77,6 +79,14 @@ public class Segment {
 	 */
 	public String getName() {
 		return roadName;
+	}
+
+	/**
+	 * Returns the speed limit of the segment
+	 * @return The Speed limit
+	 */
+	public int getSpeed(){
+		return speed;
 	}
 
 	/**

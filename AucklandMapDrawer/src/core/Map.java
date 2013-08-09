@@ -33,10 +33,12 @@ public class Map {
 	private List<Segment> markedPath = new ArrayList<Segment>();
 	private Set<Node> articulations = new HashSet<Node>();
 	private boolean polygonsExist;
+	private boolean useSpeedHeristic = false;
 	private Road selectedRoad;
 	private Node selectedSourceNode;
 	private Node selectedDestNode;
 	private TrieTree roadNames = new TrieTree();
+	private Mapper map;
 
 	/**
 	 * Initializes all Nodes, Roads and Segments into a graphed map using the
@@ -45,7 +47,7 @@ public class Map {
 	 * @param dir
 	 *            The directory containing the data files
 	 */
-	public Map(String dir) {
+	public Map(String dir, Mapper mapper) {
 		directory = dir;
 		zoomLevel = 2;
 		polygonsExist = true;
@@ -54,6 +56,7 @@ public class Map {
 		initSegments();
 		initPolygons();
 		buildGraph();
+		map = mapper;
 	}
 
 	/**
@@ -153,7 +156,7 @@ public class Map {
 					if (road != null) {
 						Segment s = new Segment(Double.parseDouble(columns[1]),
 								Integer.parseInt(columns[2]),
-								Integer.parseInt(columns[3]), road.isOneWay());
+								Integer.parseInt(columns[3]), road.isOneWay(), road.getSpeed());
 						for (int i = 4; i < columns.length; i += 2) {
 							double x = lonToX(Double
 									.parseDouble(columns[i + 1]));
@@ -269,6 +272,8 @@ public class Map {
 				curLength = length;
 			}
 		}
+		curLength = ((double)((int)(curLength*100)))/100;
+		details += "\n"+curName+": "+curLength+"km";
 		return details;
 	}
 
@@ -360,7 +365,7 @@ public class Map {
 	 * Using A* algorithm, the fastest path is found between two intersections
 	 * if two intersections are selected
 	 */
-	private void updatePath() {
+	public void updatePath() {
 		if (selectedDestNode != null && selectedSourceNode != null) {
 			for (Segment s : markedPath) {
 				s.setSelect(false);
@@ -394,7 +399,13 @@ public class Map {
 						for(Segment n : neighbours){
 							Node otherNode = n.getOppositeNode((Node)working[0], true);
 							if(!(otherNode == null || visited.contains(otherNode))){
-								fringe.add(new Object[]{otherNode,working,(Integer)working[2]+n.getLength(),(int)(otherNode.getPoint().distance(selectedDestNode.getPoint())),n});
+								int length = (Integer)working[2];
+								if(useSpeedHeristic){
+									length += n.getLength()/n.getSpeed();
+								}else{
+									length += n.getLength();
+								}
+								fringe.add(new Object[]{otherNode,working,length,(int)(otherNode.getPoint().distance(selectedDestNode.getPoint())),n});
 							}
 						}
 					}
@@ -408,13 +419,12 @@ public class Map {
 
 	public void findArticulations(){
 		if(selectedSourceNode != null){
-			this.articulations = getArticulations(selectedSourceNode, 0, selectedSourceNode);
+			this.articulations = getArticulations(selectedSourceNode, 0, selectedSourceNode,true);
 		}else if(selectedDestNode != null){
-			this.articulations = getArticulations(selectedDestNode, 0, selectedDestNode);
+			this.articulations = getArticulations(selectedDestNode, 0, selectedDestNode,true);
 		}else{
 			Mapper.textArea.setText("Must select a Intersection before finding choke points");
 		}
-		System.out.println(articulations.size());
 	}
 
 	/**
@@ -424,14 +434,17 @@ public class Map {
 	 * @param root The root node
 	 * @return An arrayList of Nodes that are articulation points
 	 */
-	private Set<Node> getArticulations(Node startNode, int depth, Node root){
-		for(Node n : nodes){
-			n.setDepth(Integer.MAX_VALUE);
+	private Set<Node> getArticulations(Node startNode, int depth, Node root, boolean first){
+		if(first){
+			for(Node n : nodes){
+				n.setDepth(Integer.MAX_VALUE);
+			}
 		}
 		Set<Node> articulations = new HashSet<Node>();
 		Stack<Object[]> stack = new Stack<Object[]>();
 
-		stack.push(new Object[]{startNode, 1, 1, new Object[]{root, 0, 0, null, null}, null}); //[[startNode,nodeDepth],depth,reach,[previousElement,previousDepth],children]
+		stack.push(new Object[]{startNode,0,0,new Object[]{root, 0, 0, null, null}, null});
+
 		while(!stack.isEmpty()){
 			Object[] element = stack.peek();
 			Node curNode = (Node)element[0];
@@ -463,6 +476,12 @@ public class Map {
 					((Object[])element[3])[2] = Math.min((Integer)((Object[])element[3])[2], (Integer)element[2]);
 				}
 				stack.pop();
+			}
+		}
+
+		for(Node n : nodes){
+			if(n.getDepth() == Integer.MAX_VALUE){
+				articulations.addAll(getArticulations(n, 0, n, false));
 			}
 		}
 
@@ -532,6 +551,21 @@ public class Map {
 		} catch (Exception e) {
 			return 0;
 		}
+	}
+
+	/**
+	 * Inverts the choice to use speed as a heristic
+	 */
+	public void toggleSpeedHeristic(){
+		useSpeedHeristic = !useSpeedHeristic;
+	}
+
+	/**
+	 * Returns whether or not speed is being used as a heristic
+	 * @return True is using speed, else return false
+	 */
+	public boolean usingSpeed(){
+		return useSpeedHeristic;
 	}
 
 }

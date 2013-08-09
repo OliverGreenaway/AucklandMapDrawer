@@ -44,6 +44,7 @@ public class Mapper extends JFrame {
 	private JPanel textOutputPane = new JPanel();
 	private JButton loadDataButton = new JButton("Load Data");
 	private JButton articulationButton = new JButton("Critical Points");
+	private JButton toggleSpeedButton = new JButton("Change to speed");
 	public static JTextArea textArea = new JTextArea();
 	private JScrollPane scrollingTextBox = new JScrollPane(textArea);
 	private JComboBox dropDown = new JComboBox();
@@ -76,6 +77,7 @@ public class Mapper extends JFrame {
 		textOutputPane.setBackground(Color.lightGray);
 		loadDataButton.setSize(120, 30);
 		articulationButton.setSize(120, 30);
+		toggleSpeedButton.setSize(120, 30);
 		textArea.setRows(10);
 		textArea.setColumns(getWidth() / 15);
 		textArea.setEnabled(true);
@@ -116,6 +118,7 @@ public class Mapper extends JFrame {
 		};
 		loadDataButton.addActionListener(aListener);
 		articulationButton.addActionListener(aListener);
+		toggleSpeedButton.addActionListener(aListener);
 		dropDown.addActionListener(new ActionListener() {
 
 			@Override
@@ -143,6 +146,7 @@ public class Mapper extends JFrame {
 		con.add(textOutputPane, BorderLayout.SOUTH);
 		buttonPane.add(loadDataButton);
 		buttonPane.add(articulationButton);
+		buttonPane.add(toggleSpeedButton);
 		menuPane.add(buttonPane, BorderLayout.WEST);
 		menuPane.add(dropDown, BorderLayout.EAST);
 		textOutputPane.add(scrollingTextBox);
@@ -172,13 +176,14 @@ public class Mapper extends JFrame {
 
 	/**
 	 * Called when the mouse is clicked on the graphics pane
+	 *
 	 * @param e
 	 */
 	public void panelMouseClicked(MouseEvent e) {
 		if (map != null) {
-			if(SwingUtilities.isLeftMouseButton(e)){
+			if (SwingUtilities.isLeftMouseButton(e)) {
 				map.clickedSourceNode(e.getX(), e.getY());
-			}else if(SwingUtilities.isRightMouseButton(e)){
+			} else if (SwingUtilities.isRightMouseButton(e)) {
 				map.clickedDestNode(e.getX(), e.getY());
 			}
 		}
@@ -224,13 +229,23 @@ public class Mapper extends JFrame {
 			if (returnValue == JFileChooser.APPROVE_OPTION) {
 				repaint();
 				dataDirectory = fc.getSelectedFile().getPath() + "/";
-				map = new Map(dataDirectory);
+				map = new Map(dataDirectory, this);
 			} else {
 				return;
 			}
-		}else if(e.getSource() == articulationButton){
-			if(map != null){
+		} else if (e.getSource() == articulationButton) {
+			if (map != null) {
 				map.findArticulations();
+			}
+		} else if (e.getSource() == toggleSpeedButton) {
+			if (map != null) {
+				map.toggleSpeedHeristic();
+				if (map.usingSpeed()) {
+					toggleSpeedButton.setText("Change to distance");
+				} else {
+					toggleSpeedButton.setText("Change to speed");
+				}
+				map.updatePath();
 			}
 		}
 		repaint();
@@ -257,8 +272,8 @@ public class Mapper extends JFrame {
 	}
 
 	/**
-	 * Called when the item in the dropdown is changed, updates the selected road
-	 * to the selected item
+	 * Called when the item in the dropdown is changed, updates the selected
+	 * road to the selected item
 	 *
 	 * @param e
 	 */
